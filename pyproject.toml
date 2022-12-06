@@ -25,3 +25,6 @@ dependencies = [
 [project.urls]
 "Homepage" = "https://github.com/mironleon/snow_globe"
 "Bug Tracker" = "https://github.com/mironleon/snow_globe/issues"
+
+[tool.isort]
+profile = "black"
