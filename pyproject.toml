@@ -17,6 +17,11 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+dependencies = [
+    "numpy==1.23.5",
+    "scipy==1.9.3",
+]
+
 [project.urls]
 "Homepage" = "https://github.com/mironleon/snow_globe"
 "Bug Tracker" = "https://github.com/mironleon/snow_globe/issues"
