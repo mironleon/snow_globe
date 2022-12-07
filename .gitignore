@@ -130,3 +130,4 @@ dmypy.json
 
 # VSCODE
 *.code-workspace
+.vscode/settings.json
