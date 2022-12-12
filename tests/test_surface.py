@@ -38,7 +38,7 @@ def test_create_gaussian_peak():
     n_sigma = round(0.33 * grid_length / sigma)
     scale_factor = 3.0
     g = surface.create_gaussian_peak(
-        sigma=sigma, n_sigma=n_sigma, scale_factor=scale_factor
+        sigma=sigma, n_sigma=n_sigma, height_factor=scale_factor
     )
     # gaussian is normalized, so should integrate to 1 times scale factpr
     integral = np.sum(g) * (0.01 * grid_length) ** 2

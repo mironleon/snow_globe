@@ -1,15 +1,16 @@
+from typing import Optional
+
 import numpy as np
 import numpy.typing as npt
 
 
 def create_grid_pos(
-    length: float, res: float, make_3D: bool = True
+    length: float, nsteps: int, make_3D: bool = True
 ) -> npt.NDArray[np.floating]:
     """
     Create a two dimensional grid of dimensions length/res x length/res Optionally
     include 3rd dimension filled with zeros.
     """
-    nsteps = round(length / res)
     shape = (nsteps**2, 3) if make_3D else (nsteps**2, 2)
     pos = np.zeros(shape)
     x = np.linspace(-length / 2.0, length / 2.0, nsteps)
@@ -19,39 +20,50 @@ def create_grid_pos(
 
 
 def create_gaussian_peak(
-    sigma: float, n_sigma: int = 2, scale_factor: float = 1.0, res: float = 0.01
+    sigma: float,
+    n_pixels: int = 2,
+    height_factor: float = 1.0,
 ) -> npt.NDArray[np.floating]:
     """Create an array of gaussian values based on a 2D grid"""
-    grid_length = 3 * n_sigma * sigma
-    grid = create_grid_pos(length=grid_length, res=res * grid_length, make_3D=False)
+    grid = create_grid_pos(length=6 * sigma, nsteps=n_pixels, make_3D=False)
     g = gaussian_2D(sigma=sigma, x=grid[:, 0], y=grid[:, 1])
-    return scale_factor * g
+    return height_factor * g
 
 
 def create_height_data(
     grid_size: int,
-    n_peaks: tuple[int],
-    sigmas: tuple[float],
-    scale_factors: tuple[float],
+    peak_widths: tuple[int, ...],
+    n_peaks: tuple[int, ...],
+    sigmas: tuple[float, ...],
+    scale_factors: tuple[float, ...],
 ) -> npt.NDArray[np.floating]:
     height_data = np.zeros((grid_size, grid_size))
-    peak_res = 0.1
-    peak_grid_size = round(1 / peak_res)
-    assert grid_size > 4 * peak_grid_size
-    for n, sigma_base, scale_factor_base in zip(n_peaks, sigmas, scale_factors):
+    for n, sigma, height_factor, peak_width in zip(
+        n_peaks, sigmas, scale_factors, peak_widths
+    ):
         for _ in range(n):
-            sigma = np.random.normal(loc=sigma_base, scale=0.1 * sigma_base)
-            scale_factor = np.random.normal(
-                loc=scale_factor_base, scale=0.1 * scale_factor_base
+            sigma = normal_perturbation(sigma, 0.001)
+            height_factor = normal_perturbation(height_factor, 0.1)
+            peak_width = round(
+                normal_perturbation(peak_width, 0.01, bounds=(10, grid_size - 10))
             )
             g = create_gaussian_peak(
-                sigma=sigma, scale_factor=scale_factor, res=peak_res
+                sigma=sigma, height_factor=height_factor, n_pixels=peak_width
             )
-            i, j = np.random.randint(0, grid_size - peak_grid_size, size=2)
-            height_data[i : i + peak_grid_size, j : j + peak_grid_size] += g.reshape(
-                (peak_grid_size, peak_grid_size)
+            i, j = np.random.randint(0, grid_size - peak_width, size=2)
+            height_data[i : i + peak_width, j : j + peak_width] += g.reshape(
+                (peak_width, peak_width)
             )
     return height_data
+
+
+def normal_perturbation(
+    val: float, sigma_frac: float, bounds: Optional[tuple[float, float]] = None
+) -> float:
+    if bounds is None:
+        bounds = (0.1 * val, 10 * val)
+    new_val = np.random.normal(loc=val, scale=sigma_frac * val)
+    return np.clip(new_val, a_min=bounds[0], a_max=bounds[1])
 
 
 def gaussian_2D(
@@ -112,9 +124,13 @@ def generate_mountain_mesh(
 ) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.integer]]:
     # TODO test
     grid_size = round(grid_length / grid_res)
-    grid_pos = create_grid_pos(grid_length, grid_res)
+    grid_pos = create_grid_pos(grid_length, grid_size)
     z = create_height_data(
-        grid_size=grid_size, n_peaks=(80,), sigmas=(1.0,), scale_factors=(1000.0,)
+        grid_size=grid_size,
+        n_peaks=(100, 100),
+        sigmas=(3.0, 3.0),
+        scale_factors=(1000.0, 1000.0),
+        peak_widths=(200, 100),
     )
     grid_pos[:, 2] = z.ravel()
     indices = triangulate_regular_grid(grid_size)
