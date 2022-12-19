@@ -11,8 +11,11 @@ def rotate_array(arr: npt.ArrayLike, angle: AngleRadians) -> npt.NDArray[np.floa
     rot_matrix = get_clockwise_rotation_matrix_2D(angle)
     # have to invert rotation matrix to preserve format of position array
     # return np.linalg.inv(rot_matrix).dot(arr)
-    return arr @ np.linalg.inv(rot_matrix)
+    return np.dot(arr, np.linalg.inv(rot_matrix))
 
 
 def get_clockwise_rotation_matrix_2D(theta: AngleRadians) -> npt.NDArray[np.floating]:
-    return np.array([[np.cos(theta), np.sin(theta)], [-np.sin(theta), np.cos(theta)]])
+    return np.array(
+        [[np.cos(theta), np.sin(theta)], [-np.sin(theta), np.cos(theta)]],
+        dtype=np.float64,
+    )
