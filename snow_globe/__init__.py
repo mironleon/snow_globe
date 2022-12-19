@@ -1,3 +1,3 @@
-from . import surface
+from . import geometry, surface
 
-__all__ = ["surface"]
+__all__ = ["surface", "geometry"]

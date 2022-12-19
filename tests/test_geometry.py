@@ -30,6 +30,18 @@ def test_get_rotation_matrix(angle, expected):
             np.pi / 6,
             np.array([[np.sqrt(3) / 2, -0.5], [0.5, np.sqrt(3) / 2]]),
         ),
+        (
+            np.array([[1, 0], [0, 1], [1, 0], [0, 1]]),
+            np.pi / 6,
+            np.array(
+                [
+                    [np.sqrt(3) / 2, -0.5],
+                    [0.5, np.sqrt(3) / 2],
+                    [np.sqrt(3) / 2, -0.5],
+                    [0.5, np.sqrt(3) / 2],
+                ]
+            ),
+        ),
     ],
 )
 def test_rotate_array(arr, angle, expected):
