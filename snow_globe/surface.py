@@ -42,10 +42,12 @@ def create_height_data(
         n_peaks, sigmas, scale_factors, peak_widths
     ):
         for _ in range(n):
-            sigma = normal_perturbation(sigma, 0.001)
-            height_factor = normal_perturbation(height_factor, 0.1)
+            sigma = normal_perturbation(sigma, 0.001 * sigma)
+            height_factor = normal_perturbation(height_factor, 0.1 * height_factor)
             peak_width = round(
-                normal_perturbation(peak_width, 0.01, bounds=(10, grid_size - 10))
+                normal_perturbation(
+                    peak_width, 0.01 * peak_width, bounds=(10, grid_size - 10)
+                )
             )
             g = create_gaussian_peak(
                 sigma=sigma, height_factor=height_factor, n_pixels=peak_width
@@ -58,11 +60,11 @@ def create_height_data(
 
 
 def normal_perturbation(
-    val: float, sigma_frac: float, bounds: Optional[tuple[float, float]] = None
+    val: float, sigma: float, bounds: Optional[tuple[float, float]] = None
 ) -> float:
     if bounds is None:
         bounds = (0.1 * val, 10 * val)
-    new_val = np.random.normal(loc=val, scale=sigma_frac * val)
+    new_val = np.random.normal(loc=val, scale=sigma)
     return np.clip(new_val, a_min=bounds[0], a_max=bounds[1])
 
 
